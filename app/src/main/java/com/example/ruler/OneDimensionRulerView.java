@@ -119,8 +119,9 @@ public class OneDimensionRulerView extends View {
     }
     public void setUnitAndUpdate(RulerUnit unit) {
         this.unit = unit;
-        saveState(); // Lưu trạng thái sau khi cập nhật unit
-        notifyDistanceChangeListener(); // Cập nhật giao diện người dùng
+        // Notify the listener with the updated distance value in the new unit
+        notifyDistanceChangeListener();
+        // Force redraw to update the view
         invalidate();
     }
 
