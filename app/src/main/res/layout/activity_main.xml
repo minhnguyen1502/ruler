@@ -2,33 +2,97 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <TextView
-        android:id="@+id/txt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ruler meter"
+    <ImageView
+        android:id="@+id/back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp"
+        android:layout_marginStart="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:src="@drawable/arrow_back_24px"/>
+
+    <TextView
+        android:id="@+id/txt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="ruler meter"
+        android:gravity="center"
+        app:layout_constraintStart_toEndOf="@id/back"
+        app:layout_constraintEnd_toStartOf="@id/gone"
+        app:layout_constraintTop_toTopOf="@id/back"
+        app:layout_constraintEnd_toEndOf="@id/back"/>
+    <ImageView
+        android:id="@+id/gone"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/arrow_back_24px"/>
     <com.example.ruler.OneDimensionRulerView
         android:id="@+id/oneDimensionRulerView"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginBottom="30dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txt"
+        app:layout_constraintTop_toBottomOf="@id/back"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
     <ImageView
-        android:layout_width="50dp"
-        android:layout_height="664dp"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:src="@drawable/img"
+        android:layout_marginBottom="30dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txt"
+        app:layout_constraintTop_toBottomOf="@id/gone"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <TextView
+        android:id="@+id/distanceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="30sp"
+        android:text="30"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/back"/>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/distanceTextView"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
+        <Button
+            android:id="@+id/buttonMM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MM" />
+
+        <Button
+            android:id="@+id/buttonCM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CM" />
+
+        <Button
+            android:id="@+id/buttonIN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IN" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
