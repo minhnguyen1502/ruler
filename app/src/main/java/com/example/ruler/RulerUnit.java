@@ -20,7 +20,6 @@ public enum RulerUnit {
         this.converter = converter;
         this.unit = unit;
     }
-
     public static float mmToPx(float mm, float coefficient, DisplayMetrics displayMetrics) {
         return mm * TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, coefficient, displayMetrics);
     }
@@ -29,18 +28,19 @@ public enum RulerUnit {
         return px / TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, coefficient, displayMetrics);
     }
 
-    /**
-     * @param value in IN
-     * @return formatted string representing the value in the enum unit
-     */
-    public String getUnitString(float value) {
-        return String.format(Locale.getDefault(), "%.1f %s", value * converter, unit);
+    public String getUnitString(float distance) {
+        switch (this) {
+            case CM:
+                return String.format("%d CM", (int) distance);
+            case MM:
+                return String.format("%.2f MM", distance).replace(',', '.');
+            case IN:
+                return String.format("%.2f IN", distance).replace(',', '.');
+            default:
+                return String.valueOf(distance);
+        }
     }
 
-    /**
-     * @param value in IN
-     * @return value converted to the enum unit
-     */
     public float convert(float value) {
         return value * converter;
     }

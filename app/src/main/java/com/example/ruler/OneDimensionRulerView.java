@@ -3,8 +3,11 @@ package com.example.ruler;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -12,15 +15,13 @@ public class OneDimensionRulerView extends View {
 
     private static final int UpperSection = 1;
     private static final int LowerSection = 2;
-    private PreferencesManager preferencesManager;
-    private RulerUnit unit;
-    private float distance;
+    private RulerUnit unit = RulerUnit.MM;
     private Paint colorPaintMask;
     private float upperY = 0f;
     private float lowerY = 1f;
-    private final float minDistance = dpTOpx(10f);
+    private final float minDistance = dpTOpx(0f);
     private int currentSection = 0;
-    private float pointerY = 0f;
+    private float pointerY = 5f;
     private float coefficient = 1f;
 
     public OneDimensionRulerView(Context context) {
@@ -30,8 +31,6 @@ public class OneDimensionRulerView extends View {
     public OneDimensionRulerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
-        preferencesManager = new PreferencesManager(context);
-        restoreState(); // Khôi phục trạng thái từ PreferencesManager
     }
 
     public OneDimensionRulerView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -42,16 +41,7 @@ public class OneDimensionRulerView extends View {
     @SuppressLint("ResourceAsColor")
     private void init() {
         colorPaintMask = new Paint(Paint.ANTI_ALIAS_FLAG);
-        colorPaintMask.setColor(Color.parseColor("#4FC606")); // Set color to green
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        upperY = h * .3f;
-        lowerY = h * .7f;
-        notifyDistanceChangeListener();
-        invalidate();
+        colorPaintMask.setColor(Color.parseColor("#4FC606"));
     }
 
     @Override
@@ -62,8 +52,25 @@ public class OneDimensionRulerView extends View {
         canvas.drawRect(0f, lowerY, getWidth(), getHeight(), colorPaintMask);
 
         Paint middleSectionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        middleSectionPaint.setColor(Color.parseColor("#001003")); // Set color to middle section
+        middleSectionPaint.setColor(Color.parseColor("#001003"));
         canvas.drawRect(0f, upperY, getWidth(), lowerY, middleSectionPaint);
+    }
+
+    public void save(SharedPreferences sharedPreferences) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putFloat("upperY", upperY);
+        editor.putFloat("lowerY", lowerY);
+        editor.putString("unit", unit.name()); // Save the current unit
+        editor.apply();
+    }
+
+    public void restore(SharedPreferences sharedPreferences) {
+        upperY = sharedPreferences.getFloat("upperY", 0f);
+        lowerY = sharedPreferences.getFloat("lowerY", getHeight());
+        String unitString = sharedPreferences.getString("unit", RulerUnit.MM.name());
+        unit = RulerUnit.valueOf(unitString); // Restore the unit
+        notifyDistanceChangeListener();
+        invalidate();
     }
 
     @Override
@@ -74,7 +81,6 @@ public class OneDimensionRulerView extends View {
                 currentSection = (event.getY() < centerPoint) ? UpperSection : LowerSection;
                 pointerY = event.getY();
                 return currentSection != 0;
-
             case MotionEvent.ACTION_MOVE:
                 float dy = event.getY() - pointerY;
                 switch (currentSection) {
@@ -90,6 +96,7 @@ public class OneDimensionRulerView extends View {
                 pointerY = event.getY();
                 notifyDistanceChangeListener();
                 invalidate();
+                save(getContext().getSharedPreferences("RulerPositions", Context.MODE_PRIVATE));
                 return true;
 
             case MotionEvent.ACTION_UP:
@@ -107,55 +114,37 @@ public class OneDimensionRulerView extends View {
         }
     }
 
-
     public float getDistance() {
-        return RulerUnit.pxToIn(Math.abs(upperY - lowerY), coefficient, getResources().getDisplayMetrics());
+        float distanceInInches = RulerUnit.pxToIn(Math.abs(upperY - lowerY), coefficient, getResources().getDisplayMetrics());
+        switch (unit) {
+            case CM:
+                return distanceInInches * 2.54f;
+            case MM:
+                return distanceInInches * 25.4f;
+            case IN:
+            default:
+                return distanceInInches;
+        }
     }
 
-
-    // Custom listener interface for distance changes
     public interface OnRulerChangeListener {
         void onRulerChange(float distance, String distanceString);
     }
+
     public void setUnitAndUpdate(RulerUnit unit) {
         this.unit = unit;
-        // Notify the listener with the updated distance value in the new unit
         notifyDistanceChangeListener();
-        // Force redraw to update the view
         invalidate();
     }
-
 
     private OnRulerChangeListener onRulerChangeListener;
 
     public void setOnRulerChangeListener(OnRulerChangeListener listener) {
         this.onRulerChangeListener = listener;
-        // Notify the listener with the initial distance value
         notifyDistanceChangeListener();
     }
-
     private float dpTOpx(float dp) {
         return dp * getContext().getResources().getDisplayMetrics().density;
     }
 
-    // Lưu trạng thái
-    private void saveState() {
-        preferencesManager.saveUnit(unit);
-        preferencesManager.saveDistance(distance);
-    }
-
-    private void restoreState() {
-        unit = preferencesManager.getSavedUnit();
-        distance = preferencesManager.getSavedDistance();
-        notifyDistanceChangeListener(); // Cập nhật giao diện người dùng
-    }
-
-    // Phương thức setUnitAndUpdate() đã có
-
-    // Ghi đè phương thức onDetachedFromWindow để lưu trạng thái khi View bị hủy
-    @Override
-    protected void onDetachedFromWindow() {
-        saveState();
-        super.onDetachedFromWindow();
-    }
 }
